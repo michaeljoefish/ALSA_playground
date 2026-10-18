@@ -45,6 +45,41 @@ int main(){
 	
 	// Fun stuff happens here.
 	// TODO: Fun stuff.
+	for (unsigned int i = 0; i<num_entries; i++){
+		printf("Element #%u\n", i);
+		// Getting element identifier from element i in elem_list.
+		snd_ctl_elem_id_t* element_id;
+		snd_ctl_elem_list_get_id(elem_list, i, element_id);
+		// Getting identifiers from the identifier.
+		unsigned int numid = snd_ctl_elem_id_get_numid(element_id);
+		snd_ctl_elem_iface_t interface = snd_ctl_elem_id_get_interface(element_id);
+		const char* interface_name = snd_ctl_elem_iface_name(interface);
+		unsigned int device = snd_ctl_elem_id_get_device(element_id);
+		unsigned int subdevice = snd_ctl_elem_id_get_subdevice(element_id);
+		const char* name = snd_ctl_elem_id_get_name(element_id);
+		unsigned int index = snd_ctl_elem_id_get_index(element_id);
+
+		printf("NumID: %u, Iface_name: %s, Device: %u, SubDevice: %u, Name: %s, Index: %u\n",
+				numid, interface_name, device, subdevice, name, index);
+		// Getting element info from element list.
+
+		snd_ctl_elem_info_t* element_info;
+		snd_ctl_elem_info_alloca(&element_info);
+		snd_ctl_elem_info_set_id(element_info, element_id);
+		result = snd_ctl_elem_info(ctl_handle, element_info);
+		if (result != 0){printf("Failed to get element info. Error code: %d\n", result); return result;}
+		unsigned int value_count = snd_ctl_elem_info_get_count(element_info);
+		unsigned int info_device = snd_ctl_elem_info_get_device(element_info);
+		unsigned int info_index = snd_ctl_elem_info_get_index(element_info);
+		printf("Value_count: %u, Info_Device: %u, Info_Index: %u\n\n", value_count, info_device, info_index);
+	}
+
+	/*snd_ctl_elem_info_t* element_info;
+	printf("Uno\n");
+	result = snd_ctl_elem_info(ctl_handle, element_info);
+	if (result != 0){printf("Failed to get element info. Error code: %d\n", result); return result;}
+	printf("Dos\n");*/
+	
 
 	// Don't forget to cleanup. First free the identifiers, and then the list.
 	snd_ctl_elem_list_free_space(elem_list);
