@@ -48,11 +48,22 @@ int main(){
 	// Fun stuff happens here.
 	// TODO: Fun stuff.
 	// NOTE: Hasn't been fun so far.
+	
+	// Allocate an element id on the stack.
+	snd_ctl_elem_id_t* element_id;
+	snd_ctl_elem_id_alloca(&element_id);	// ALWAYS MAKE SURE YOU ALLOCATE SPACE FOR THE OPAQUE TYPES. CAN BE STACK OR HEAP.
+	
+	// Allocate an element info struct on the stack.
+	snd_ctl_elem_info_t* element_info;
+	snd_ctl_elem_info_alloca(&element_info);
+	
+	// Allocate an invalid element value on the stack.
+	snd_ctl_elem_value_t* element_value;
+	snd_ctl_elem_value_alloca(&element_value);
+	
 	for (unsigned int i = 0; i<num_entries; i++){
 		printf("Element #%u\n", i);
 		// Getting element identifier from element i in elem_list.
-		snd_ctl_elem_id_t* element_id;
-		snd_ctl_elem_id_alloca(&element_id);	// ALWAYS MAKE SURE YOU ALLOCATE SPACE FOR THE OPAQUE TYPES. CAN BE STACK OR HEAP.
 		snd_ctl_elem_list_get_id(elem_list, i, element_id);
 		// Getting identifiers from the identifier.
 		unsigned int numid = snd_ctl_elem_id_get_numid(element_id);
@@ -67,8 +78,6 @@ int main(){
 		
 
 		// Getting element info from element list.
-		snd_ctl_elem_info_t* element_info;
-		snd_ctl_elem_info_alloca(&element_info);
 		snd_ctl_elem_info_set_id(element_info, element_id);
 		result = snd_ctl_elem_info(ctl_handle, element_info);
 		if (result != 0){printf("Failed to get element info. Error code: %d\n", result); return result;}
@@ -83,9 +92,6 @@ int main(){
 		
 
 		// Now get info on all members (values) of each element.
-		// Allocate an invalid element value on the stack.
-		snd_ctl_elem_value_t* element_value;
-		snd_ctl_elem_value_alloca(&element_value);
 		// Init ID data for value.
 		snd_ctl_elem_value_set_id(element_value, element_id);
 		// Now we should read element data into element value.
