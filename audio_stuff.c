@@ -3,6 +3,49 @@
 #include <alsa/control.h>
 #include <alsa/control_plugin.h>
 
+void extract_values(snd_ctl_elem_type_t value_type, snd_ctl_elem_value_t* element_value, unsigned int value_count){
+	switch (value_type){
+		case(SND_CTL_ELEM_TYPE_BOOLEAN):
+			for (unsigned int i=0; i<value_count; i++){
+				printf("Boolean %u: %d\t", i, snd_ctl_elem_value_get_boolean(element_value, i));
+			}
+			printf("\n");
+			break;
+		case(SND_CTL_ELEM_TYPE_INTEGER):
+			for (unsigned int i=0; i<value_count; i++){
+				printf("Integer %u: %ld\t", i, snd_ctl_elem_value_get_integer(element_value, i));
+			}
+			printf("\n");
+			break;
+		case(SND_CTL_ELEM_TYPE_INTEGER64):
+			for (unsigned int i=0; i<value_count; i++){
+				printf("Integer64 %u: %lld\t", i, snd_ctl_elem_value_get_integer64(element_value, i));
+			}
+			printf("\n");
+			break;
+		case(SND_CTL_ELEM_TYPE_BYTES):
+			printf("Printing up to 4 bytes of this value.");
+			unsigned char* bytes = (unsigned char*)snd_ctl_elem_value_get_bytes(element_value);
+			for (unsigned int i=0; i<value_count && i<4; i++){
+				printf("Byte %u: %hhu\t", i, bytes[i]);
+			}
+			printf("\n");
+			break;
+		case(SND_CTL_ELEM_TYPE_ENUMERATED):
+			for (unsigned int i=0; i<value_count; i++){
+				printf("Enum %u: %u\t", i, snd_ctl_elem_value_get_enumerated(element_value, i));
+			}
+			printf("\n");
+			break;
+		case(SND_CTL_ELEM_TYPE_IEC958):
+			printf("There's IEC958 data in here. Don't know how to use it.\n");
+			break;
+		default:
+			printf("INVALID TYPE\n");
+
+	}
+}
+
 int main(){
 	void** hints = NULL;
 	int result = snd_device_name_hint(-1, "ctl", &hints);
@@ -104,8 +147,15 @@ int main(){
 		unsigned int value_subdevice = snd_ctl_elem_value_get_subdevice(element_value);
 		const char* value_name = snd_ctl_elem_value_get_name(element_value);
 		unsigned int value_index = snd_ctl_elem_value_get_index(element_value);
-		printf("Val_NumID: %u\tVal_iface_name: %s\tVal_device: %u\tVal_subdevice: %u\tVal_name: %s\tVal_idx: %u\n\n",
+		printf("Val_NumID: %u\tVal_iface_name: %s\tVal_device: %u\tVal_subdevice: %u\tVal_name: %s\tVal_idx: %u\n",
 				value_numid, value_iface_name, value_device, value_subdevice, value_name, value_index);
+
+		if (element_type == SND_CTL_ELEM_TYPE_INTEGER){
+			printf("min: %ld\tmax: %ld\t\n", snd_ctl_elem_info_get_min(element_info),
+					snd_ctl_elem_info_get_max(element_info));
+		}
+		extract_values(element_type, element_value, value_count);
+		printf("\n");
 		
 	}
 
